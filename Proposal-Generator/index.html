@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposal Generator — Solo Operator OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400;1,600&family=Syne:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --black:#0c0c0b;--white:#fafaf8;--off:#f0ede6;--mid:#e2ddd5;
+  --dim:#9a9488;--faint:#c8c3bb;--accent:#d4420c;--green:#2a7a4b;
+}
+html{height:100%;}
+body{min-height:100%;background:var(--white);color:var(--black);font-family:'Syne',sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;}
+nav{border-bottom:1px solid var(--mid);padding:1.1rem 5vw;display:flex;align-items:center;justify-content:space-between;background:rgba(250,250,248,0.97);position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;text-decoration:none;color:var(--black);display:flex;align-items:center;gap:0.5rem;}
+.logo-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulse 2.5s ease infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.4);opacity:0.6;}}
+.nav-tool{font-size:0.65rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:var(--dim);}
+.nav-uses{font-size:0.65rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.4rem 1rem;border:1px solid var(--mid);color:var(--dim);}
+.nav-uses.low{border-color:var(--accent);color:var(--accent);}
+.app{max-width:900px;margin:0 auto;padding:4rem 5vw 6rem;}
+.app-header{margin-bottom:3.5rem;}
+.app-eyebrow{font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;gap:0.8rem;}
+.app-eyebrow::before{content:'';width:20px;height:1px;background:var(--accent);}
+.app-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,64px);font-weight:600;line-height:0.95;letter-spacing:-0.01em;margin-bottom:1rem;}
+.app-title em{font-style:italic;color:var(--accent);}
+.app-sub{font-size:0.85rem;line-height:1.7;color:var(--dim);max-width:500px;}
+.uses-banner{background:var(--off);border:1px solid var(--mid);padding:1rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;}
+.uses-text{font-size:0.72rem;color:var(--dim);}
+.uses-text strong{color:var(--black);}
+.uses-dots{display:flex;gap:0.4rem;}
+.uses-dot{width:8px;height:8px;border-radius:50%;background:var(--mid);transition:background 0.3s;}
+.uses-dot.used{background:var(--accent);}
+.form-section{background:var(--off);border:1px solid var(--mid);padding:2.5rem;margin-bottom:2rem;}
+.form-label{font-size:0.62rem;font-weight:500;letter-spacing:0.25em;text-transform:uppercase;color:var(--dim);margin-bottom:1rem;display:block;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+.form-group{display:flex;flex-direction:column;gap:0.5rem;}
+.form-group label{font-size:0.6rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:var(--dim);}
+input,select,textarea{background:var(--white);border:1px solid var(--mid);padding:0.85rem 1rem;font-family:'Syne',sans-serif;font-size:0.85rem;color:var(--black);outline:none;width:100%;transition:border-color 0.2s;appearance:none;border-radius:0;}
+input:focus,select:focus,textarea:focus{border-color:var(--black);}
+textarea{min-height:140px;resize:vertical;line-height:1.6;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9488' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem;cursor:pointer;}
+.gen-btn{width:100%;background:var(--black);color:var(--white);border:none;padding:1.2rem;font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;justify-content:center;gap:0.8rem;}
+.gen-btn:hover{background:#1a1a18;}
+.gen-btn:disabled{background:var(--faint);cursor:not-allowed;}
+.btn-spinner{width:14px;height:14px;border:1.5px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;display:none;}
+.gen-btn.loading .btn-spinner{display:block;}
+.gen-btn.loading .btn-text{opacity:0.6;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.output-section{display:none;border:1px solid var(--mid);margin-bottom:2rem;}
+.output-section.visible{display:block;}
+.output-header{border-bottom:1px solid var(--mid);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between;background:var(--off);}
+.output-label{font-size:0.6rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:0.6rem;}
+.output-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.output-actions{display:flex;gap:0.8rem;}
+.action-btn{font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;padding:0.5rem 1.1rem;border:1px solid var(--mid);background:transparent;color:var(--dim);cursor:pointer;font-family:'Syne',sans-serif;transition:all 0.2s;}
+.action-btn:hover{border-color:var(--black);color:var(--black);}
+.action-btn.primary{background:var(--black);color:var(--white);border-color:var(--black);}
+.action-btn.primary:hover{background:var(--accent);border-color:var(--accent);}
+.action-btn.copied{background:var(--green);color:var(--white);border-color:var(--green);}
+.output-body{padding:2.5rem;font-family:'Cormorant Garamond',serif;font-size:1.05rem;line-height:1.9;color:var(--black);white-space:pre-wrap;min-height:300px;}
+.paywall{display:none;position:fixed;inset:0;background:rgba(12,12,11,0.7);z-index:500;align-items:center;justify-content:center;padding:2rem;backdrop-filter:blur(4px);}
+.paywall.visible{display:flex;}
+.paywall-card{background:var(--white);max-width:500px;width:100%;padding:3.5rem;}
+.paywall-eyebrow{font-size:0.58rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;display:flex;align-items:center;gap:0.8rem;}
+.paywall-eyebrow::before{content:'';width:16px;height:1px;background:var(--accent);}
+.paywall-title{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:600;line-height:1;margin-bottom:1rem;}
+.paywall-sub{font-size:0.82rem;line-height:1.7;color:var(--dim);margin-bottom:2rem;}
+.paywall-price{font-family:'Cormorant Garamond',serif;font-size:3.5rem;font-weight:300;line-height:1;margin-bottom:0.3rem;}
+.paywall-period{font-size:0.75rem;color:var(--dim);margin-bottom:2rem;}
+.paywall-features{list-style:none;margin-bottom:2.5rem;display:flex;flex-direction:column;gap:0.7rem;}
+.paywall-features li{font-size:0.8rem;color:var(--dim);display:flex;align-items:center;gap:0.7rem;}
+.paywall-features li::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+.paywall-btn{width:100%;background:var(--black);color:var(--white);border:none;padding:1.1rem;font-family:'Syne',sans-serif;font-size:0.72rem;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;margin-bottom:1rem;}
+.paywall-btn:hover{background:var(--accent);}
+.paywall-dismiss{width:100%;background:transparent;color:var(--faint);border:1px solid var(--mid);padding:0.8rem;font-family:'Syne',sans-serif;font-size:0.65rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.paywall-dismiss:hover{color:var(--dim);border-color:var(--dim);}
+.tips{margin-top:2.5rem;border-top:1px solid var(--mid);padding-top:2rem;}
+.tips-label{font-size:0.58rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--faint);margin-bottom:1.2rem;}
+.tips-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.tip{padding:1.2rem;background:var(--off);border:1px solid var(--mid);cursor:pointer;transition:background 0.2s,border-color 0.2s;}
+.tip:hover{background:var(--white);border-color:var(--black);}
+.tip-label{font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem;}
+.tip-text{font-size:0.75rem;color:var(--dim);line-height:1.5;}
+.error-msg{background:#fff0ed;border:1px solid #f5c4b3;padding:1rem 1.5rem;font-size:0.8rem;color:var(--accent);margin-bottom:1rem;display:none;}
+.error-msg.visible{display:block;}
+@media(max-width:600px){.form-row{grid-template-columns:1fr;}.tips-grid{grid-template-columns:1fr;}.output-header{flex-direction:column;gap:1rem;align-items:flex-start;}.paywall-card{padding:2rem;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="https://solooperatoros.com" class="nav-logo">
+    <span class="logo-dot"></span>
+    Solo Operator OS
+  </a>
+  <span class="nav-tool">Proposal Generator</span>
+  <span class="nav-uses" id="navUses">3 free uses</span>
+</nav>
+
+<div class="app">
+  <div class="app-header">
+    <p class="app-eyebrow">AI Tool — No. 04</p>
+    <h1 class="app-title">Paste a brief.<br><em>Get a proposal.</em></h1>
+    <p class="app-sub">Describe your client project and we'll generate a complete professional proposal in seconds. Scope, deliverables, timeline, and price — done.</p>
+  </div>
+
+  <div class="uses-banner">
+    <span class="uses-text">You have <strong id="usesLeft">3</strong> free proposals remaining</span>
+    <div class="uses-dots">
+      <div class="uses-dot" id="dot1"></div>
+      <div class="uses-dot" id="dot2"></div>
+      <div class="uses-dot" id="dot3"></div>
+    </div>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <div class="form-section">
+    <span class="form-label">Project Details</span>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Client Name</label>
+        <input type="text" id="clientName" placeholder="e.g. Marcus Reid" />
+      </div>
+      <div class="form-group">
+        <label>Your Name / Business</label>
+        <input type="text" id="yourName" placeholder="e.g. Solo Operator OS" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Service Type</label>
+        <select id="serviceType">
+          <option value="">Select a service...</option>
+          <option>Brand Strategy</option>
+          <option>Website Design</option>
+          <option>Social Media Management</option>
+          <option>Content Creation</option>
+          <option>Copywriting</option>
+          <option>Email Marketing</option>
+          <option>SEO & Growth</option>
+          <option>Video Production</option>
+          <option>Consulting</option>
+          <option>Custom / Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Budget Range</label>
+        <select id="budget">
+          <option value="">Select budget...</option>
+          <option>Under $500</option>
+          <option>$500 – $1,000</option>
+          <option>$1,000 – $2,500</option>
+          <option>$2,500 – $5,000</option>
+          <option>$5,000 – $10,000</option>
+          <option>$10,000+</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Timeline</label>
+        <select id="timeline">
+          <option value="">Select timeline...</option>
+          <option>1–2 weeks</option>
+          <option>2–4 weeks</option>
+          <option>1–2 months</option>
+          <option>2–3 months</option>
+          <option>3–6 months</option>
+          <option>Ongoing / Retainer</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tone</label>
+        <select id="tone">
+          <option value="professional">Professional</option>
+          <option value="confident">Confident & Direct</option>
+          <option value="friendly">Friendly & Approachable</option>
+          <option value="premium">Premium / High-End</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:1.5rem;">
+      <label>Project Brief</label>
+      <textarea id="brief" placeholder="Describe the project in detail. What does the client need? What are the goals? What problem are you solving? The more detail you give, the better the proposal."></textarea>
+    </div>
+    <button class="gen-btn" id="genBtn" onclick="generateProposal()">
+      <div class="btn-spinner"></div>
+      <span class="btn-text">Generate Proposal</span>
+    </button>
+  </div>
+
+  <div class="output-section" id="outputSection">
+    <div class="output-header">
+      <span class="output-label">
+        <span class="output-dot"></span>
+        Generated Proposal
+      </span>
+      <div class="output-actions">
+        <button class="action-btn" onclick="downloadProposal()">Download</button>
+        <button class="action-btn primary" id="copyBtn" onclick="copyProposal()">Copy</button>
+      </div>
+    </div>
+    <div class="output-body" id="outputBody"></div>
+  </div>
+
+  <div class="tips">
+    <p class="tips-label">// Quick start examples — click to use</p>
+    <div class="tips-grid">
+      <div class="tip" onclick="fillExample('website')">
+        <p class="tip-label">Website Design</p>
+        <p class="tip-text">5-page business site for a local law firm. Modern, mobile-first, with contact form.</p>
+      </div>
+      <div class="tip" onclick="fillExample('social')">
+        <p class="tip-label">Social Media</p>
+        <p class="tip-text">Monthly content management for a fitness brand. 3 posts/week across Instagram and TikTok.</p>
+      </div>
+      <div class="tip" onclick="fillExample('copy')">
+        <p class="tip-label">Copywriting</p>
+        <p class="tip-text">Full website copy rewrite for a SaaS startup. Homepage, about, pricing, 3 feature pages.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="paywall" id="paywall">
+  <div class="paywall-card">
+    <p class="paywall-eyebrow">Upgrade to continue</p>
+    <h2 class="paywall-title">You've used your 3 free proposals.</h2>
+    <p class="paywall-sub">Unlock unlimited proposals plus the full Solo Operator toolkit — Invoice Generator, Cold Outreach Writer, Client Report Builder, and more.</p>
+    <div class="paywall-price">$15</div>
+    <p class="paywall-period">per month — cancel anytime</p>
+    <ul class="paywall-features">
+      <li>Unlimited proposal generation</li>
+      <li>Download as formatted file</li>
+      <li>All 4 AI tools included in Solo plan</li>
+      <li>Access to Solo Operator community</li>
+    </ul>
+    <button class="paywall-btn" onclick="goToCheckout()">Unlock Unlimited Access</button>
+    <button class="paywall-dismiss" onclick="dismissPaywall()">Maybe later</button>
+  </div>
+</div>
+
+<script>
+const FREE_LIMIT = 3;
+let usesCount = parseInt(localStorage.getItem('proposal_uses') || '0');
+let currentProposal = '';
+let isSubscribed = localStorage.getItem('proposal_subscribed') === 'true';
+
+function updateUsesUI() {
+  const left = Math.max(0, FREE_LIMIT - usesCount);
+  document.getElementById('usesLeft').textContent = left;
+  const navUses = document.getElementById('navUses');
+  navUses.textContent = left + ' free use' + (left !== 1 ? 's' : '') + ' left';
+  if (left <= 1) navUses.classList.add('low');
+  [1,2,3].forEach(i => {
+    const dot = document.getElementById('dot' + i);
+    if (i <= usesCount) dot.classList.add('used');
+    else dot.classList.remove('used');
+  });
+  if (left === 0 && !isSubscribed) {
+    document.getElementById('genBtn').disabled = true;
+    document.getElementById('genBtn').querySelector('.btn-text').textContent = 'Upgrade to Generate';
+  }
+}
+updateUsesUI();
+
+function fillExample(type) {
+  const examples = {
+    website: { client:'Johnson & Associates Law', service:'Website Design', budget:'$2,500 – $5,000', timeline:'2–4 weeks', brief:'5-page professional website for a local law firm specializing in family law. Needs modern, clean design that builds trust. Pages: Home, About, Practice Areas, Team, Contact. Must be mobile-responsive with a contact form and Google Maps integration.' },
+    social: { client:'Peak Performance Fitness', service:'Social Media Management', budget:'$1,000 – $2,500', timeline:'Ongoing / Retainer', brief:'Monthly social media management for an online fitness coaching brand. 3 posts per week across Instagram and TikTok. Content includes workout tips, client transformations, motivational content. Goal is to grow from 2K to 10K followers in 6 months.' },
+    copy: { client:'Streamline SaaS', service:'Copywriting', budget:'$2,500 – $5,000', timeline:'1–2 months', brief:'Complete website copy rewrite for a project management SaaS tool targeting small agencies. Needs: Homepage, About page, Pricing page, and 3 feature pages. Tone should be confident, clear, conversion-focused.' }
+  };
+  const ex = examples[type];
+  document.getElementById('clientName').value = ex.client;
+  document.getElementById('serviceType').value = ex.service;
+  document.getElementById('budget').value = ex.budget;
+  document.getElementById('timeline').value = ex.timeline;
+  document.getElementById('brief').value = ex.brief;
+  document.getElementById('brief').focus();
+}
+
+async function generateProposal() {
+  if (!isSubscribed && usesCount >= FREE_LIMIT) {
+    document.getElementById('paywall').classList.add('visible');
+    return;
+  }
+
+  const brief = document.getElementById('brief').value.trim();
+  if (!brief) {
+    document.getElementById('brief').style.borderColor = 'var(--accent)';
+    setTimeout(() => document.getElementById('brief').style.borderColor = '', 2000);
+    return;
+  }
+
+  const clientName = document.getElementById('clientName').value.trim();
+  const yourName = document.getElementById('yourName').value.trim();
+  const serviceType = document.getElementById('serviceType').value;
+  const budget = document.getElementById('budget').value;
+  const timeline = document.getElementById('timeline').value;
+  const tone = document.getElementById('tone').value;
+
+  const prompt = `You are an expert freelance proposal writer. Create a complete, professional client proposal.
+
+CLIENT: ${clientName || 'The Client'}
+SERVICE PROVIDER: ${yourName || 'Solo Operator'}
+SERVICE: ${serviceType || 'Professional Services'}
+BUDGET: ${budget || 'To be discussed'}
+TIMELINE: ${timeline || 'To be discussed'}
+TONE: ${tone}
+PROJECT BRIEF: ${brief}
+
+Write a complete proposal with these sections:
+1. EXECUTIVE SUMMARY
+2. UNDERSTANDING YOUR NEEDS
+3. PROPOSED SOLUTION
+4. SCOPE OF WORK
+5. TIMELINE
+6. INVESTMENT
+7. WHY CHOOSE US
+8. NEXT STEPS
+
+Format professionally. Use the client name and service provider name throughout. Make it feel personal, not templated. Use plain text section headers in ALL CAPS followed by a colon. Do not use markdown.`;
+
+  const btn = document.getElementById('genBtn');
+  const errorMsg = document.getElementById('errorMsg');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  errorMsg.classList.remove('visible');
+
+  const outputSection = document.getElementById('outputSection');
+  const outputBody = document.getElementById('outputBody');
+  outputSection.classList.add('visible');
+  outputBody.textContent = 'Generating your proposal...';
+
+  try {
+    const response = await fetch('/.netlify/functions/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Generation failed. Please try again.');
+    }
+
+    const text = await response.text();
+    outputBody.textContent = text;
+    currentProposal = text;
+
+    if (!isSubscribed) {
+      usesCount++;
+      localStorage.setItem('proposal_uses', usesCount);
+      updateUsesUI();
+      if (usesCount >= FREE_LIMIT) {
+        setTimeout(() => document.getElementById('paywall').classList.add('visible'), 3000);
+      }
+    }
+
+  } catch(err) {
+    outputBody.textContent = '';
+    errorMsg.textContent = err.message || 'Something went wrong. Please try again.';
+    errorMsg.classList.add('visible');
+  }
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  btn.querySelector('.btn-text').textContent = 'Generate Again';
+}
+
+function copyProposal() {
+  if (!currentProposal) return;
+  navigator.clipboard.writeText(currentProposal).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function downloadProposal() {
+  if (!currentProposal) return;
+  const clientName = document.getElementById('clientName').value || 'Client';
+  const blob = new Blob([currentProposal], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Proposal_${clientName.replace(/\s+/g,'_')}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function goToCheckout() { window.location.href = 'https://solooperatoros.com/#pricing'; }
+function dismissPaywall() { document.getElementById('paywall').classList.remove('visible'); }
+
+document.getElementById('brief').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.ctrlKey) generateProposal();
+});
+</script>
+</body>
+</html>
