@@ -1,3 +1,2 @@
-[build]
-  publish = "Proposal-Generator"
-  functions = "Proposal-Generator/netlify/functions"
+[functions]
+  directory = "Proposal-Generator/netlify/functions"
