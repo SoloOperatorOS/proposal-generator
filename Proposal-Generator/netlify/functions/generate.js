@@ -28,7 +28,8 @@ exports.handler = async function(event, context) {
 
     const data = await response.json();
 
-    if (!response.ok) {
+   if (!response.ok) {
+      console.log('API ERROR:', JSON.stringify(data));
       return {
         statusCode: response.status,
         headers,
